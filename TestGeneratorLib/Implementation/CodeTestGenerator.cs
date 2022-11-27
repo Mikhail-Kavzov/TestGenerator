@@ -88,14 +88,14 @@ namespace TestGeneratorLib.Implementation
         {
             return MethodDeclaration(attributeLists: List<AttributeListSyntax>().Add(_attr),
                 modifiers: TokenList(Token(SyntaxKind.PublicKeyword)),
-                returnType: ParseTypeName("void"),
+                returnType: PredefinedType(Token(SyntaxKind.VoidKeyword)),
                 explicitInterfaceSpecifier: null,
                 identifier: Identifier(methodName + "Test"),
                 typeParameterList: null,
                 parameterList: ParameterList(),
                 constraintClauses: List<TypeParameterConstraintClauseSyntax>(),
                 body: Block(_body),
-                semicolonToken: Token(SyntaxKind.SemicolonToken)).
+                semicolonToken: new SyntaxToken()).
                 WithAdditionalAnnotations(Formatter.Annotation);
         }
 
