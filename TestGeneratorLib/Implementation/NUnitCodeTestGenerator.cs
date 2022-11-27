@@ -1,28 +1,22 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using TestGeneratorLib.Interfaces;
 
 namespace TestGeneratorLib.Implementation
 {
-    public sealed class NUnitCodeTestGenerator : CodeTestGenerator,ICodeTestGenerator
+    public sealed class NUnitCodeTestGenerator : CodeTestGenerator, ICodeTestGenerator
     {
-        public NUnitCodeTestGenerator():base("Test")
-        {            
+        public NUnitCodeTestGenerator() : base("Test")
+        {
         }
 
         public string[] Generate(string text)
         {
             var root = CSharpSyntaxTree.ParseText(text).GetCompilationUnitRoot();
-           return GenerateClasses(root).ToArray();
-        }  
+            return GenerateClasses(root).ToArray();
+        }
 
         protected override UsingDirectiveSyntax GetDefaultUsing()
         {

@@ -23,14 +23,14 @@ namespace TestGeneratorLib.Implementation
                 Where(m => m.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword)));
         }
 
-        private string GenerateClass(ClassDeclarationSyntax classDeclaration,NamespaceDeclarationSyntax newNamespace, in SyntaxList<UsingDirectiveSyntax> usings)
+        private string GenerateClass(ClassDeclarationSyntax classDeclaration, NamespaceDeclarationSyntax newNamespace, in SyntaxList<UsingDirectiveSyntax> usings)
         {
             var compilationUnit = CompilationUnit();
             var newClass = ClassDeclaration(classDeclaration.Identifier.Text + "Tests")
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)));
             var publicMethods = GetPublicMethods(classDeclaration);
             newClass = newClass.AddMembers(GenerateTestMethods(publicMethods).ToArray());
-            compilationUnit=compilationUnit.AddUsings(usings.ToArray());
+            compilationUnit = compilationUnit.AddUsings(usings.ToArray());
             compilationUnit = compilationUnit.AddMembers(newNamespace.AddMembers(newClass));
             return compilationUnit.NormalizeWhitespace().ToString();
         }
@@ -50,16 +50,15 @@ namespace TestGeneratorLib.Implementation
             var newClasses = new List<string>();
             var oldNamespace = root.DescendantNodes().OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
             var newNamespace = CreateNewNamespace(oldNamespace);
-            root.Usings.Add(GetDefaultUsing());
+            var usings = root.Usings.Add(GetDefaultUsing());
             var classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
-            var usings = root.Usings;
             foreach (var classDeclaration in classes)
             {
-                newClasses.Add(GenerateClass(classDeclaration, newNamespace,  in usings));
+                newClasses.Add(GenerateClass(classDeclaration, newNamespace, in usings));
             }
             return newClasses;
         }
-    
+
 
         private NamespaceDeclarationSyntax CreateNewNamespace(NamespaceDeclarationSyntax? oldNamespace)
         {
@@ -91,13 +90,13 @@ namespace TestGeneratorLib.Implementation
                 modifiers: TokenList(Token(SyntaxKind.PublicKeyword)),
                 returnType: ParseTypeName("void"),
                 explicitInterfaceSpecifier: null,
-                identifier: Literal(methodName + "Test"),
+                identifier: Identifier(methodName + "Test"),
                 typeParameterList: null,
-                parameterList: null,
+                parameterList: ParameterList(),
                 constraintClauses: List<TypeParameterConstraintClauseSyntax>(),
                 body: Block(_body),
                 semicolonToken: Token(SyntaxKind.SemicolonToken)).
-                WithAdditionalAnnotations(Formatter.Annotation);        
+                WithAdditionalAnnotations(Formatter.Annotation);
         }
 
         /// <summary>
@@ -111,8 +110,5 @@ namespace TestGeneratorLib.Implementation
         /// </summary>
         /// <returns></returns>
         protected abstract StatementSyntax GetUnitTestBody();
-
-
-
     }
 }
