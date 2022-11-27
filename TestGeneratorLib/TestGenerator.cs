@@ -16,5 +16,11 @@ namespace TestGeneratorLib
         public async Task Generate(string[] files, string writeFolder, int maxDegreeOfParallelism = 5)
         {
         }
+
+        private async Task<string> ReadFileAsync(string fileName)
+        {
+            using StreamReader sr = new(fileName);
+            return await sr.ReadToEndAsync();
+        }
     }
 }

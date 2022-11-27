@@ -18,12 +18,10 @@ namespace TestGeneratorLib.Implementation
         {            
         }
 
-        public async Task<string> Generate(string text)
+        public string[] Generate(string text)
         {
             var root = CSharpSyntaxTree.ParseText(text).GetCompilationUnitRoot();
-            
-            return "";
-
+           return GenerateClasses(root).ToArray();
         }  
 
         protected override UsingDirectiveSyntax GetDefaultUsing()
