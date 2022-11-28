@@ -9,7 +9,6 @@ namespace TestGeneratorLib
     public sealed class TestGenerator
     {
         private readonly ICodeTestGenerator _generator;
-        private static object locker = new();
 
         public TestGenerator(ICodeTestGenerator generator)
         {
