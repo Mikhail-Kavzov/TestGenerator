@@ -9,12 +9,21 @@ namespace TestGeneratorLib
     public sealed class TestGenerator
     {
         private readonly ICodeTestGenerator _generator;
+        private static object locker = new();
 
         public TestGenerator(ICodeTestGenerator generator)
         {
             _generator = generator;
         }
 
+        /// <summary>
+        /// Generate source test code
+        /// </summary>
+        /// <param name="files">files array to read</param>
+        /// <param name="writeFolder">folder to write</param>
+        /// <param name="maxDegreeOfParallelism">parallelism degree</param>
+        /// <returns></returns>
+        /// <exception cref="FileNotFoundException"></exception>
         public Task Generate(string[] files, string writeFolder, int maxDegreeOfParallelism = 5)
         {
             var exDataFlowOptions = new ExecutionDataflowBlockOptions()
@@ -26,7 +35,7 @@ namespace TestGeneratorLib
                 exDataFlowOptions);
 
             var generateCodeBlock = new TransformManyBlock<string, string>(
-                    async text => await _generator.Generate(text),
+                    text => _generator.Generate(text),
                     exDataFlowOptions);
 
             var writeFileBlock = new ActionBlock<string>(
@@ -37,12 +46,21 @@ namespace TestGeneratorLib
             readFileBlock.LinkTo(generateCodeBlock, linkOptions);
             generateCodeBlock.LinkTo(writeFileBlock, linkOptions);
 
+            if (!Directory.Exists(writeFolder))
+            {
+                Directory.CreateDirectory(writeFolder);
+            }
+
             foreach (var file in files)
             {
+                if (!File.Exists(file))
+                {
+                    throw new FileNotFoundException($"File not found: {file}");
+                }
                 readFileBlock.Post(file);
             }
             readFileBlock.Complete();
-            return readFileBlock.Completion;
+            return writeFileBlock.Completion;
         }
 
         private static async Task<string> ReadFileAsync(string fileName)
@@ -55,8 +73,8 @@ namespace TestGeneratorLib
         {
             var root = await CSharpSyntaxTree.ParseText(text).GetRootAsync();
             var classDeclaration = root.DescendantNodes().OfType<ClassDeclarationSyntax>().First();
-            var fileName = classDeclaration.Identifier.Text + ".cs";
-            using StreamWriter sr = new(writeFolder + fileName);
+            var path = writeFolder + classDeclaration.Identifier.Text + "_" + Guid.NewGuid().ToString() + ".cs";
+            using StreamWriter sr = new(path);
             await sr.WriteAsync(text);
         }
     }

@@ -12,9 +12,9 @@ namespace TestGeneratorLib.Implementation
         {
         }
 
-        public async Task<string[]> Generate(string text)
+        public string[] Generate(string text)
         {
-            var root = (CompilationUnitSyntax) await (CSharpSyntaxTree.ParseText(text).GetRootAsync());
+            var root = CSharpSyntaxTree.ParseText(text).GetCompilationUnitRoot();           
             return GenerateClasses(root).ToArray();
         }
 

@@ -8,6 +8,6 @@ namespace TestGeneratorLib.Interfaces
 {
     public interface ICodeTestGenerator
     {
-        Task<string[]> Generate(string text);
+        string[] Generate(string text);
     }
 }
