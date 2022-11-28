@@ -33,6 +33,9 @@ namespace TestGeneratorLib
                 async text => await WriteFileAsync(text, writeFolder),
                 exDataFlowOptions);
 
+            readFileBlock.LinkTo(generateCodeBlock);
+            generateCodeBlock.LinkTo(writeFileBlock);
+
             foreach (var file in files)
             {
                 readFileBlock.Post(file);
@@ -41,13 +44,13 @@ namespace TestGeneratorLib
             return readFileBlock.Completion;
         }
 
-        private async Task<string> ReadFileAsync(string fileName)
+        private static async Task<string> ReadFileAsync(string fileName)
         {
             using StreamReader sr = new(fileName);
             return await sr.ReadToEndAsync();
         }
 
-        private async Task WriteFileAsync(string text, string writeFolder)
+        private static async Task WriteFileAsync(string text, string writeFolder)
         {
             var root = await CSharpSyntaxTree.ParseText(text).GetRootAsync();
             var classDeclaration = root.DescendantNodes().OfType<ClassDeclarationSyntax>().First();
