@@ -15,7 +15,7 @@ internal class Program
             files.Add(fileName);
         }
 
-        var testGenerator = new TestGenerator(new NUnitCodeTestGenerator());
+        var testGenerator = new TestGenerator(new NUnitCodeTestGenerator(), new GeneratorConfig());
         var task=testGenerator.Generate(files.ToArray(), writeFolder);
         task.Wait();
     }
