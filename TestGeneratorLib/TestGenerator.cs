@@ -33,8 +33,9 @@ namespace TestGeneratorLib
                 async text => await WriteFileAsync(text, writeFolder),
                 exDataFlowOptions);
 
-            readFileBlock.LinkTo(generateCodeBlock);
-            generateCodeBlock.LinkTo(writeFileBlock);
+            var linkOptions = new DataflowLinkOptions { PropagateCompletion = true };
+            readFileBlock.LinkTo(generateCodeBlock, linkOptions);
+            generateCodeBlock.LinkTo(writeFileBlock, linkOptions);
 
             foreach (var file in files)
             {
