@@ -9,10 +9,12 @@ namespace TestGeneratorLib
     public sealed class TestGenerator
     {
         private readonly ICodeTestGenerator _generator;
+        private readonly GeneratorConfig _generatorConfig;
 
-        public TestGenerator(ICodeTestGenerator generator)
+        public TestGenerator(ICodeTestGenerator generator, GeneratorConfig generatorConfig)
         {
             _generator = generator;
+            _generatorConfig = generatorConfig;
         }
 
         /// <summary>
@@ -23,23 +25,29 @@ namespace TestGeneratorLib
         /// <param name="maxDegreeOfParallelism">parallelism degree</param>
         /// <returns></returns>
         /// <exception cref="FileNotFoundException"></exception>
-        public Task Generate(string[] files, string writeFolder, int maxDegreeOfParallelism = 5)
+        public Task Generate(string[] files, string writeFolder)
         {
-            var exDataFlowOptions = new ExecutionDataflowBlockOptions()
-            {
-                MaxDegreeOfParallelism = maxDegreeOfParallelism,
-            };
+
             var readFileBlock = new TransformBlock<string, string>(
                 async fileName => await ReadFileAsync(fileName),
-                exDataFlowOptions);
+                new ExecutionDataflowBlockOptions()
+                {
+                    MaxDegreeOfParallelism = _generatorConfig.MaxDegreeOfRead,
+                });
 
             var generateCodeBlock = new TransformManyBlock<string, string>(
-                    text => _generator.Generate(text),
-                    exDataFlowOptions);
+                text => _generator.Generate(text),
+                new ExecutionDataflowBlockOptions()
+                {
+                    MaxDegreeOfParallelism = _generatorConfig.MaxDegreeOfGenerate,
+                });
 
             var writeFileBlock = new ActionBlock<string>(
                 async text => await WriteFileAsync(text, writeFolder),
-                exDataFlowOptions);
+                new ExecutionDataflowBlockOptions()
+                {
+                    MaxDegreeOfParallelism = _generatorConfig.MaxDegreeOfWrite,
+                });
 
             var linkOptions = new DataflowLinkOptions { PropagateCompletion = true };
             readFileBlock.LinkTo(generateCodeBlock, linkOptions);
