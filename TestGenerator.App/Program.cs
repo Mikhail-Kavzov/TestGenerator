@@ -6,8 +6,8 @@ internal class Program
     private static async Task Main()
     {
         List<string> files = new(12);
-        const string writeFolder = @"C:\Users\User\source\repos\TestGenerator\FolderToWrite\";
-        const string path = @"C:\Users\User\source\repos\TestGenerator\ClassesFolder\TestClass";
+        const string writeFolder = @"..\..\..\..\FolderToWrite\";
+        const string path = @"..\..\..\..\ClassesFolder\TestClass";
 
         for (int i=0; i<files.Capacity; i++)
         {
