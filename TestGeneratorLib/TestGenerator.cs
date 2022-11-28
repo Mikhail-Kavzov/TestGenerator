@@ -1,5 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Threading.Tasks.Dataflow;
 using TestGeneratorLib.Interfaces;
 
 namespace TestGeneratorLib
@@ -13,14 +15,45 @@ namespace TestGeneratorLib
             _generator = generator;
         }
 
-        public async Task Generate(string[] files, string writeFolder, int maxDegreeOfParallelism = 5)
+        public Task Generate(string[] files, string writeFolder, int maxDegreeOfParallelism = 5)
         {
+            var exDataFlowOptions = new ExecutionDataflowBlockOptions()
+            {
+                MaxDegreeOfParallelism = maxDegreeOfParallelism,
+            };
+            var readFileBlock = new TransformBlock<string, string>(
+                async fileName => await ReadFileAsync(fileName),
+                exDataFlowOptions);
+
+            var generateCodeBlock = new TransformManyBlock<string, string>(
+                    async text => await _generator.Generate(text),
+                    exDataFlowOptions);
+
+            var writeFileBlock = new ActionBlock<string>(
+                async text => await WriteFileAsync(text, writeFolder),
+                exDataFlowOptions);
+
+            foreach (var file in files)
+            {
+                readFileBlock.Post(file);
+            }
+            readFileBlock.Complete();
+            return readFileBlock.Completion;
         }
 
         private async Task<string> ReadFileAsync(string fileName)
         {
             using StreamReader sr = new(fileName);
             return await sr.ReadToEndAsync();
+        }
+
+        private async Task WriteFileAsync(string text, string writeFolder)
+        {
+            var root = await CSharpSyntaxTree.ParseText(text).GetRootAsync();
+            var classDeclaration = root.DescendantNodes().OfType<ClassDeclarationSyntax>().First();
+            var fileName = classDeclaration.Identifier.Text + ".cs";
+            using StreamWriter sr = new(writeFolder + fileName);
+            await sr.WriteAsync(text);
         }
     }
 }
