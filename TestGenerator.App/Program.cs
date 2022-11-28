@@ -3,7 +3,7 @@ using TestGeneratorLib.Implementation;
 
 internal class Program
 {
-    private static async Task Main()
+    private static void Main()
     {
         List<string> files = new(12);
         const string writeFolder = @"..\..\..\..\FolderToWrite\";
