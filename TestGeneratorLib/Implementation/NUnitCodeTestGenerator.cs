@@ -18,7 +18,7 @@ namespace TestGeneratorLib.Implementation
             return GenerateClasses(root).ToArray();
         }
 
-        protected override UsingDirectiveSyntax GetDefaultUsing()
+        protected override UsingDirectiveSyntax GetUnitTestUsing()
         {
             return UsingDirective(
                 QualifiedName(IdentifierName("NUnit"),

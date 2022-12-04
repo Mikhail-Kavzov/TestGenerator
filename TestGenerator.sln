@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestGeneratorLib", "TestGen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestGenerator.Tests", "TestGenerator.Tests\TestGenerator.Tests.csproj", "{65028403-9AB4-473F-AB70-62D64E20E5F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGenerator.App", "TestGenerator.App\TestGenerator.App.csproj", "{A46F07E6-9DFE-4738-9D72-0C09BDED83C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestGenerator.App", "TestGenerator.App\TestGenerator.App.csproj", "{A46F07E6-9DFE-4738-9D72-0C09BDED83C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

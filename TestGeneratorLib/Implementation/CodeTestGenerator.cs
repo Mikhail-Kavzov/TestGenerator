@@ -12,13 +12,13 @@ namespace TestGeneratorLib.Implementation
         private readonly StatementSyntax _body;
         private readonly AttributeListSyntax? _classAttr;
 
-        protected CodeTestGenerator(string attr, string? classAttr=null)
+        protected CodeTestGenerator(string attr, string? classAttr = null)
         {
             _methodAttr = CreateAttribute(attr);
             _body = GetUnitTestBody();
             if (classAttr != null)
             {
-                _classAttr= CreateAttribute(classAttr);
+                _classAttr = CreateAttribute(classAttr);
             }
         }
 
@@ -61,7 +61,12 @@ namespace TestGeneratorLib.Implementation
             var newClasses = new List<string>();
             var oldNamespace = root.DescendantNodes().OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
             var newNamespace = CreateNewNamespace(oldNamespace);
-            var usings = root.Usings.Add(GetDefaultUsing());
+            var additionalUsings = root.Usings.UnionBy(GetDefaultUsings(), u => u.Name.ToString());
+
+            SyntaxList<UsingDirectiveSyntax> usings = List(additionalUsings.UnionBy(
+                new List<UsingDirectiveSyntax>() { GetUnitTestUsing() }, u => u.Name)
+                .DistinctBy(u => u.Name.ToString()));
+
             var classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
 
             foreach (var classDeclaration in classes)
@@ -111,11 +116,45 @@ namespace TestGeneratorLib.Implementation
                 WithAdditionalAnnotations(Formatter.Annotation);
         }
 
+        private static SyntaxList<UsingDirectiveSyntax> GetDefaultUsings()
+        {
+            return List(new List<UsingDirectiveSyntax>()
+            {
+                UsingDirective(
+                IdentifierName("System")
+                ),
+
+                UsingDirective(
+                QualifiedName(
+                    QualifiedName(
+                        IdentifierName("System"),
+                        IdentifierName("Collections")
+                        ),
+                    IdentifierName("Generic")
+                    )
+                ),
+
+                UsingDirective(
+                QualifiedName(
+                    IdentifierName("System"),
+                    IdentifierName("Linq")
+                    )
+                ),
+
+                UsingDirective(
+                QualifiedName(
+                    IdentifierName("System"),
+                    IdentifierName("Text")
+                    )
+                ),
+            });
+        }
+
         /// <summary>
         /// Default using for Unit Test generator
         /// </summary>
         /// <returns></returns>
-        protected abstract UsingDirectiveSyntax GetDefaultUsing();
+        protected abstract UsingDirectiveSyntax GetUnitTestUsing();
 
         /// <summary>
         /// Gets body of Unit Test
