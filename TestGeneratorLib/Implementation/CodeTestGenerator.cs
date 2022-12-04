@@ -63,9 +63,8 @@ namespace TestGeneratorLib.Implementation
             var newNamespace = CreateNewNamespace(oldNamespace);
             var additionalUsings = root.Usings.UnionBy(GetDefaultUsings(), u => u.Name.ToString());
 
-            SyntaxList<UsingDirectiveSyntax> usings = List(additionalUsings.UnionBy(
-                new List<UsingDirectiveSyntax>() { GetUnitTestUsing() }, u => u.Name)
-                .DistinctBy(u => u.Name.ToString()).OrderBy(u=>u.Name.ToString()));
+            SyntaxList<UsingDirectiveSyntax> usings = List(additionalUsings.OrderBy(u => u.Name.ToString())
+                .UnionBy(new List<UsingDirectiveSyntax>() { GetUnitTestUsing() }, u => u.Name));
 
             var classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
 
