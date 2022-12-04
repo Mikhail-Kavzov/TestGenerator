@@ -7,7 +7,7 @@ namespace TestGeneratorTests.Tests
     [TestFixture]
     public class GeneratorTests
     {
-        private readonly TestGenerator _defaultTestGenerator;
+        private readonly TestPipeline _defaultTestGenerator;
         private readonly GeneratorConfig _defaultGeneratorConfig = new();
         private const string writeFolder = @"..\..\..\..\TestGenerator\FolderToWrite\";
         private const string path = @"..\..\..\..\ClassesFolder\TestClass";
@@ -40,7 +40,7 @@ namespace TestGeneratorTests.Tests
         public void CorrectTestWithOneDegree()
         {
             var oneGeneratorConfig = new GeneratorConfig(1, 1, 1);
-            var testOneGenerator = new TestGenerator(new NUnitCodeTestGenerator(), oneGeneratorConfig);
+            var testOneGenerator = new TestPipeline(new NUnitCodeTestGenerator(), oneGeneratorConfig);
             var task = testOneGenerator.Generate(_files, writeFolder);
             Assert.That(task, Is.Not.Null);
             task.Wait();

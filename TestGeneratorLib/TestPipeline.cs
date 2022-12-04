@@ -6,12 +6,12 @@ using TestGeneratorLib.Interfaces;
 
 namespace TestGeneratorLib
 {
-    public sealed class TestGenerator
+    public sealed class TestPipeline
     {
         private readonly ICodeTestGenerator _generator;
         private readonly GeneratorConfig _generatorConfig;
 
-        public TestGenerator(ICodeTestGenerator generator, GeneratorConfig generatorConfig)
+        public TestPipeline(ICodeTestGenerator generator, GeneratorConfig generatorConfig)
         {
             _generator = generator;
             _generatorConfig = generatorConfig;
@@ -72,7 +72,7 @@ namespace TestGeneratorLib
 
         private static async Task<string> ReadFileAsync(string fileName)
         {
-            using StreamReader sr = new(fileName);
+            using StreamReader sr = new(fileName); 
             return await sr.ReadToEndAsync();
         }
 
