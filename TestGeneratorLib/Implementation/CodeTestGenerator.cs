@@ -65,7 +65,7 @@ namespace TestGeneratorLib.Implementation
 
             SyntaxList<UsingDirectiveSyntax> usings = List(additionalUsings.UnionBy(
                 new List<UsingDirectiveSyntax>() { GetUnitTestUsing() }, u => u.Name)
-                .DistinctBy(u => u.Name.ToString()));
+                .DistinctBy(u => u.Name.ToString()).OrderBy(u=>u.Name.ToString()));
 
             var classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
 
