@@ -28,13 +28,14 @@ namespace TestGeneratorLib.Implementation
                 Where(m => m.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword)));
         }
 
-        private string GenerateClass(ClassDeclarationSyntax classDeclaration, NamespaceDeclarationSyntax newNamespace, in SyntaxList<UsingDirectiveSyntax> usings)
+        private string GenerateClass(ClassDeclarationSyntax classDeclaration,
+            NamespaceDeclarationSyntax newNamespace, in SyntaxList<UsingDirectiveSyntax> usings)
         {
             var compilationUnit = CompilationUnit();
 
             var newClass = ClassDeclaration(classDeclaration.Identifier.Text + "Tests")
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
-                .WithAttributeLists(new SyntaxList<AttributeListSyntax>() { _classAttr});
+                .WithAttributeLists(List<AttributeListSyntax>().Add(_classAttr));
 
             var publicMethods = GetPublicMethods(classDeclaration);
             newClass = newClass.AddMembers(GenerateTestMethods(publicMethods).ToArray());
