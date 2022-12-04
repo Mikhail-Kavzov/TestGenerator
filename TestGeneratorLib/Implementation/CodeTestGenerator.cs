@@ -8,16 +8,21 @@ namespace TestGeneratorLib.Implementation
 {
     public abstract class CodeTestGenerator
     {
-        private readonly AttributeListSyntax _attr;
+        private readonly AttributeListSyntax _methodAttr;
         private readonly StatementSyntax _body;
+        private readonly AttributeListSyntax? _classAttr;
 
-        protected CodeTestGenerator(string attr)
+        protected CodeTestGenerator(string attr, string? classAttr=null)
         {
-            _attr = CreateUnitTestAttribute(attr);
+            _methodAttr = CreateAttribute(attr);
             _body = GetUnitTestBody();
+            if (classAttr != null)
+            {
+                _classAttr= CreateAttribute(classAttr);
+            }
         }
 
-        private IEnumerable<MethodDeclarationSyntax> GetPublicMethods(ClassDeclarationSyntax classDeclaration)
+        private static IEnumerable<MethodDeclarationSyntax> GetPublicMethods(ClassDeclarationSyntax classDeclaration)
         {
             return classDeclaration.DescendantNodes().OfType<MethodDeclarationSyntax>().
                 Where(m => m.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword)));
@@ -26,12 +31,17 @@ namespace TestGeneratorLib.Implementation
         private string GenerateClass(ClassDeclarationSyntax classDeclaration, NamespaceDeclarationSyntax newNamespace, in SyntaxList<UsingDirectiveSyntax> usings)
         {
             var compilationUnit = CompilationUnit();
+
             var newClass = ClassDeclaration(classDeclaration.Identifier.Text + "Tests")
-                .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)));
+                .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
+                .WithAttributeLists(new SyntaxList<AttributeListSyntax>() { _classAttr});
+
             var publicMethods = GetPublicMethods(classDeclaration);
             newClass = newClass.AddMembers(GenerateTestMethods(publicMethods).ToArray());
+
             compilationUnit = compilationUnit.AddUsings(usings.ToArray());
             compilationUnit = compilationUnit.AddMembers(newNamespace.AddMembers(newClass));
+
             return compilationUnit.NormalizeWhitespace().ToString();
         }
 
@@ -52,6 +62,7 @@ namespace TestGeneratorLib.Implementation
             var newNamespace = CreateNewNamespace(oldNamespace);
             var usings = root.Usings.Add(GetDefaultUsing());
             var classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
+
             foreach (var classDeclaration in classes)
             {
                 newClasses.Add(GenerateClass(classDeclaration, newNamespace, in usings));
@@ -60,7 +71,7 @@ namespace TestGeneratorLib.Implementation
         }
 
 
-        private NamespaceDeclarationSyntax CreateNewNamespace(NamespaceDeclarationSyntax? oldNamespace)
+        private static NamespaceDeclarationSyntax CreateNewNamespace(NamespaceDeclarationSyntax? oldNamespace)
         {
             return NamespaceDeclaration(
                 oldNamespace == null ? IdentifierName("Tests") : IdentifierName($"{oldNamespace.Name}.Tests"));
@@ -71,7 +82,7 @@ namespace TestGeneratorLib.Implementation
         /// </summary>
         /// <param name="attributeName">Attribute Name</param>
         /// <returns></returns>
-        private AttributeListSyntax CreateUnitTestAttribute(string attributeName)
+        private static AttributeListSyntax CreateAttribute(string attributeName)
         {
             return AttributeList(
                              SingletonSeparatedList(
@@ -86,7 +97,7 @@ namespace TestGeneratorLib.Implementation
         /// <returns></returns>
         private MethodDeclarationSyntax GenerateTestMethod(string methodName)
         {
-            return MethodDeclaration(attributeLists: List<AttributeListSyntax>().Add(_attr),
+            return MethodDeclaration(attributeLists: List<AttributeListSyntax>().Add(_methodAttr),
                 modifiers: TokenList(Token(SyntaxKind.PublicKeyword)),
                 returnType: PredefinedType(Token(SyntaxKind.VoidKeyword)),
                 explicitInterfaceSpecifier: null,

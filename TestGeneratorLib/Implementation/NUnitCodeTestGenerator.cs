@@ -8,7 +8,7 @@ namespace TestGeneratorLib.Implementation
 {
     public sealed class NUnitCodeTestGenerator : CodeTestGenerator, ICodeTestGenerator
     {
-        public NUnitCodeTestGenerator() : base("Test")
+        public NUnitCodeTestGenerator() : base("Test","TestFixture")
         {
         }
 
